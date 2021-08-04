@@ -2,8 +2,11 @@
 #include<math.h>
 #include<stdio.h>   //definitions/declarations for standard I/O routines
 #include<stdlib.h>   //declarations/definitions for commonly used library functions
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #define H_SPIN 0.02
 static GLfloat g_spin=H_SPIN;
+unsigned int bg2;
 GLfloat a = 0, b = 0, c = 0, d = 0, e = 0;
 void helicopter(int xx,int yy);
 int start=0;
@@ -186,7 +189,53 @@ void drawstring2(float x,float y,float z,char *string)
 //welcome screen here or front screen
 void frontscreen()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_TEXTURE_2D);
+   
+    
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, bg2);
+    glBegin(GL_QUADS);
+    glVertex3f(0, 0, 10);
+    glTexCoord2f(0, 0);
+    glVertex3f(0, 1000, 10);
+    glTexCoord2f(0, 1);
+    glVertex3f(1000, 1000, 10);
+    glTexCoord2f(1, 1);
+    glVertex3f(1000, 0, 10);
+    glTexCoord2f(1, 0);
+    glEnd();
+    glFlush();
+    glDisable(GL_TEXTURE_2D);
+    glutSwapBuffers();
+	glGenTextures(1, &bg2);
+    glBindTexture(GL_TEXTURE_2D, bg2);
+    // set the bg1 wrapping/filtering options (on the currently bound bg1 object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the bg1
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("intro1.jpeg", &width, &height, &nrChannels, STBI_rgb_alpha);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        //glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        printf("Failed to load bg1");
+    }
+    stbi_image_free(data);
+	glEnable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, 1000, 0, 1000, 0, -500);
+    glMatrixMode(GL_MODELVIEW);
+    glClearColor(1, 1, 1, 1);
+	/*glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(1,1,1,0);
 	glBegin(GL_POLYGON);
 			 
@@ -226,7 +275,7 @@ void frontscreen()
 	glColor3f(0.0,0.0,0.0);
 	drawstring1(200,230,0.0,"For instructions press: n");
 	glFlush();
-	glutSwapBuffers();
+	glutSwapBuffers();*/
 }
 void instruction()
 {
